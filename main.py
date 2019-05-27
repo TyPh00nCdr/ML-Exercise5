@@ -7,7 +7,7 @@ def main():
     data_circle = np.loadtxt('data/dataCircle.txt')
     global feats, labels
     feats = data_circle[:, :2]
-    labels = data_circle[:, 2]
+    labels = [-1 if i == 0 else i for i in data_circle[:, 2]]
 
     # AdaBoost
     ada_boost = AdaBoostClassifier()
