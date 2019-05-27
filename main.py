@@ -22,6 +22,10 @@ def main():
 
 
 def plot_boundaries(ax, clf):
+    """
+    See: https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html
+         https://scikit-learn.org/stable/auto_examples/ensemble/plot_adaboost_twoclass.html
+    """
     plot_step = 0.02
     x_min, x_max = feats[:, 0].min() - 0.5, feats[:, 0].max() + 0.5
     y_min, y_max = feats[:, 1].min() - 0.5, feats[:, 1].max() + 0.5
