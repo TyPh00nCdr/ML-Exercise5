@@ -5,16 +5,21 @@ from sklearn.ensemble import AdaBoostClassifier
 
 def main():
     data_circle = np.loadtxt('data/dataCircle.txt')
+    data_circle[data_circle[:, 2] == 0, 2] = -1.0
+    
+    sorted_x = data_circle[data_circle[:, 0].argsort()]
+    sorted_y = data_circle[data_circle[:, 1].argsort()]
+
     global feats, labels
     feats = data_circle[:, :2]
-    labels = [-1 if i == 0 else i for i in data_circle[:, 2]]
+    labels = data_circle[:, 2]
 
     # AdaBoost
-    ada_boost = AdaBoostClassifier()
-    ada_boost.fit(feats, labels)
+    # ada_boost = AdaBoostClassifier()
+    # ada_boost.fit(feats, labels)
 
     fig, ax = plt.subplots()
-    plot_boundaries(ax, ada_boost)
+    # plot_boundaries(ax, ada_boost)
 
     # Plot data pointsFs
     ax.scatter(*feats.T, c=labels)
