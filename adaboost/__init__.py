@@ -24,7 +24,9 @@ def main():
     strong_classifier = StrongClassifier()
 
     # Gedanken: Kann selber weak learner 2x ausgewählt werden? Falls ja, wird dann nur sein alpha im strong learner ge-
-    # updated oder wird eine Kopie des weak learners mit neuem alpha zum strong learner hinzugefügt?
+    # updated oder wird eine Kopie des weak learners mit neuem alpha zum strong learner hinzugefügt? Mit letzterem würde
+    # auch der Error-Wert zum Schritt t gemerkt und der Error könnte korrekt berechnet werden (nicht nur vom aktuellen
+    # Error ausgehend, wie aktuell!!
     for t in range(2000):
         for clf in weak_classifiers:
             if epsilon_err(clf) >= .5:
@@ -40,7 +42,8 @@ def main():
         Z = np.sqrt(1 - 4 * (.5 - next_classifier.error) ** 2)
         D = [(1 / Z) * D[i] * np.exp(-1 * next_classifier.alpha * feat[2] * next_classifier.predict(feat)) for
              i, feat in enumerate(data_circle)]
-        print(np.exp(-2 * sum((-2 * (0.5 - clf.error) ** 2 for clf in weak_classifiers))))
+        print(np.exp(-2 * sum((-2 * (0.5 - clf.error) ** 2 for clf in
+                               weak_classifiers))))  # wrong: error always uptodate and not historical
 
     # print([strong_classifier.predict(i) for i in feats])
     # print(labels)
