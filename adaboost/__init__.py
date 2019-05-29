@@ -1,11 +1,11 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.ensemble import AdaBoostClassifier
-from weakclassifier import WeakClassifierX, WeakClassifierY
+import numpy as np
+
+from adaboost.weakclassifier import WeakClassifierX, WeakClassifierY
 
 
 def main():
-    data_circle = np.loadtxt('data/dataCircle.txt')
+    data_circle = np.loadtxt('../data/dataCircle.txt')
     data_circle[data_circle[:, 2] == 0, 2] = -1.0
 
     sorted_x = data_circle[data_circle[:, 0].argsort()]
