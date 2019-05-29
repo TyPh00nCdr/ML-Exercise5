@@ -1,18 +1,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import AdaBoostClassifier
+from weakclassifier import WeakClassifierX, WeakClassifierY
 
 
 def main():
     data_circle = np.loadtxt('data/dataCircle.txt')
     data_circle[data_circle[:, 2] == 0, 2] = -1.0
-    
+
     sorted_x = data_circle[data_circle[:, 0].argsort()]
     sorted_y = data_circle[data_circle[:, 1].argsort()]
 
     global feats, labels
     feats = data_circle[:, :2]
     labels = data_circle[:, 2]
+
+    weak_x = [WeakClassifierX(min(x1[0], x2[0]) + np.abs(x1[0] - x2[0]) / 2) for x1, x2 in
+              zip(sorted_x[:], sorted_x[1:]) if x1[2] != x2[2]]
+    weak_y = [WeakClassifierY(min(y1[1], y2[1]) + np.abs(y1[1] - y2[1]) / 2) for y1, y2 in
+              zip(sorted_y[:], sorted_y[1:]) if y1[2] != y2[2]]
 
     # AdaBoost
     # ada_boost = AdaBoostClassifier()
