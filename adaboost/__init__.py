@@ -35,7 +35,7 @@ def main():
 
 
 def epsilon_err(h):
-    return sum(D[i] * (1 if h(i) != labels[i] else 0) for i in range(m))
+    return sum(D[i] * (h(i) != labels[i]) for i in range(m))
 
 
 def plot_boundaries(ax, clf):
