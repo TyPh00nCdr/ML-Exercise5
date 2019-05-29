@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-from adaboost.weakclassifier import WeakClassifierX, WeakClassifierY
+from adaboost.classifier import WeakClassifierX, WeakClassifierY, StrongClassifier
 
 
 def main():
@@ -21,15 +20,30 @@ def main():
               zip(sorted_x[:], sorted_x[1:]) if x1[2] != x2[2]]
     weak_y = [WeakClassifierY(min(y1[1], y2[1]) + np.abs(y1[1] - y2[1]) / 2) for y1, y2 in
               zip(sorted_y[:], sorted_y[1:]) if y1[2] != y2[2]]
-    weak_classifiers = np.concatenate((weak_x, weak_y))
-    # map(lambda h: h.flip_parity(), weak_classifiers[np.vectorize(epsilon_err)(weak_classifiers) >= .5])
-    for clf in weak_classifiers:
-        if epsilon_err(clf) >= .5:
-            clf.flip_parity()
+    weak_classifiers = weak_x + weak_y
+    strong_classifier = StrongClassifier()
 
-    alpha = np.zeros(weak_classifiers)
-    next_classifier = min(weak_classifiers, key=epsilon_err)
-    Z = sum(D[i] * np.exp(-1 * alpha[i] * feat[2] * next_classifier.predict(feat)) for i, feat in enumerate(feats))
+    # Gedanken: Kann selber weak learner 2x ausgewählt werden? Falls ja, wird dann nur sein alpha im strong learner ge-
+    # updated oder wird eine Kopie des weak learners mit neuem alpha zum strong learner hinzugefügt?
+    for t in range(2000):
+        for clf in weak_classifiers:
+            if epsilon_err(clf) >= .5:
+                clf.flip_parity()
+                clf.error = epsilon_err(clf)
+            else:
+                clf.error = epsilon_err(clf)
+        next_classifier = min(weak_classifiers, key=lambda h: h.error)
+        next_classifier.alpha = .5 * np.log((1 - next_classifier.error) / next_classifier.error)
+        # weak_classifiers.remove(next_classifier)
+        strong_classifier.add_weak_clf(next_classifier)
+        # Z = sum(D[i] * np.exp(-1 * next_classifier.alpha * feat[2] * next_classifier.predict(feat)) for i, feat in enumerate(data_circle))
+        Z = np.sqrt(1 - 4 * (.5 - next_classifier.error) ** 2)
+        D = [(1 / Z) * D[i] * np.exp(-1 * next_classifier.alpha * feat[2] * next_classifier.predict(feat)) for
+             i, feat in enumerate(data_circle)]
+        print(np.exp(-2 * sum((-2 * (0.5 - clf.error) ** 2 for clf in weak_classifiers))))
+
+    # print([strong_classifier.predict(i) for i in feats])
+    # print(labels)
 
     # AdaBoost
     # ada_boost = AdaBoostClassifier()
@@ -37,6 +51,11 @@ def main():
 
     fig, ax = plt.subplots()
     # plot_boundaries(ax, ada_boost)
+    for clf in strong_classifier.weak_classifiers:
+        if isinstance(clf, WeakClassifierX):
+            ax.plot(np.linspace(-10, 10, num=2), np.full(2, clf.theta_threshold), 'k--')
+        elif isinstance(clf, WeakClassifierY):
+            ax.plot(np.full(2, clf.theta_threshold), np.linspace(-10, 10, num=2), 'k--')
 
     # Plot data pointsFs
     ax.scatter(*feats.T, c=labels)
