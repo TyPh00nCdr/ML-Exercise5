@@ -11,9 +11,11 @@ def main():
     sorted_x = data_circle[data_circle[:, 0].argsort()]
     sorted_y = data_circle[data_circle[:, 1].argsort()]
 
-    global feats, labels
+    global feats, labels, D, m
     feats = data_circle[:, :2]
     labels = data_circle[:, 2]
+    m = len(feats)
+    D = np.full(m, 1 / m)
 
     weak_x = [WeakClassifierX(min(x1[0], x2[0]) + np.abs(x1[0] - x2[0]) / 2) for x1, x2 in
               zip(sorted_x[:], sorted_x[1:]) if x1[2] != x2[2]]
@@ -30,6 +32,10 @@ def main():
     # Plot data pointsFs
     ax.scatter(*feats.T, c=labels)
     plt.show()
+
+
+def epsilon_err(h):
+    return sum(D[i] * (1 if h(i) != labels[i] else 0) for i in range(m))
 
 
 def plot_boundaries(ax, clf):
