@@ -11,7 +11,7 @@ def main():
     sorted_x = data_circle[data_circle[:, 0].argsort()]
     sorted_y = data_circle[data_circle[:, 1].argsort()]
 
-    global feats, labels, D, m
+    global feats, labels, D, m, alpha, Z
     feats = data_circle[:, :2]
     labels = data_circle[:, 2]
     m = len(feats)
@@ -21,6 +21,15 @@ def main():
               zip(sorted_x[:], sorted_x[1:]) if x1[2] != x2[2]]
     weak_y = [WeakClassifierY(min(y1[1], y2[1]) + np.abs(y1[1] - y2[1]) / 2) for y1, y2 in
               zip(sorted_y[:], sorted_y[1:]) if y1[2] != y2[2]]
+    weak_classifiers = np.concatenate((weak_x, weak_y))
+    # map(lambda h: h.flip_parity(), weak_classifiers[np.vectorize(epsilon_err)(weak_classifiers) >= .5])
+    for clf in weak_classifiers:
+        if epsilon_err(clf) >= .5:
+            clf.flip_parity()
+
+    alpha = np.zeros(weak_classifiers)
+    next_classifier = min(weak_classifiers, key=epsilon_err)
+    Z = sum(D[i] * np.exp(-1 * alpha[i] * feat[2] * next_classifier.predict(feat)) for i, feat in enumerate(feats))
 
     # AdaBoost
     # ada_boost = AdaBoostClassifier()
@@ -35,7 +44,7 @@ def main():
 
 
 def epsilon_err(h):
-    return sum(D[i] * (h(i) != labels[i]) for i in range(m))
+    return sum([D[i] * (h.predict(feat) != labels[i]) for i, feat in enumerate(feats)])
 
 
 def plot_boundaries(ax, clf):
