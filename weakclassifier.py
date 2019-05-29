@@ -12,7 +12,7 @@ class WeakClassifierBase:
         self.parity = parity
 
     def __repr__(self):
-        return "%s [theta_threshold=%d, parity=%d]" % (self.__class__.__name__, self.theta_threshold, self.parity)
+        return "{}[theta_threshold={}, parity={}]".format(self.__class__.__name__, self.theta_threshold, self.parity)
 
 
 class WeakClassifierX(WeakClassifierBase):
